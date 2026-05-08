@@ -1,35 +1,91 @@
 import pandas as pd
+import pickle
+
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-import pickle
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix
+)
 
-# Load data
+# =========================
+# Load datasets
+# =========================
+
 fake = pd.read_csv("Fake.csv")
 real = pd.read_csv("True.csv")
 
+# Add labels
 fake["label"] = 0
 real["label"] = 1
 
+# Combine datasets
 data = pd.concat([fake, real])
-data = data.sample(frac=1)
 
-# Features
+# Shuffle data properly
+data = data.sample(frac=1, random_state=42)
+
+# =========================
+# Features and labels
+# =========================
+
 X = data["text"]
 y = data["label"]
 
-# Vectorize
-vectorizer = TfidfVectorizer(stop_words='english', max_df=0.7)
+# =========================
+# Text Vectorization
+# =========================
+
+vectorizer = TfidfVectorizer(
+    stop_words='english',
+    max_df=0.7
+)
+
 X = vectorizer.fit_transform(X)
 
-# Train
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+# =========================
+# Train/Test Split
+# =========================
 
-model = LogisticRegression()
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+# =========================
+# Train Model
+# =========================
+
+model = LogisticRegression(max_iter=1000)
+
 model.fit(X_train, y_train)
 
-# Save model
+# =========================
+# Evaluate Model
+# =========================
+
+predictions = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, predictions)
+
+print("\nModel Accuracy:")
+print(accuracy)
+
+print("\nClassification Report:")
+print(classification_report(y_test, predictions))
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, predictions))
+
+# =========================
+# Save Model
+# =========================
+
 pickle.dump(model, open("model.pkl", "wb"))
 pickle.dump(vectorizer, open("vectorizer.pkl", "wb"))
 
-print("Model trained and saved!")
+print("\nModel and vectorizer saved successfully!")
