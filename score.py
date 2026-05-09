@@ -14,8 +14,8 @@ def init():
 
     model_dir = os.getenv("AZUREML_MODEL_DIR", ".")
 
-    model_path = os.path.join(model_dir, "model.pkl")
-    vectorizer_path = os.path.join(model_dir, "vectorizer.pkl")
+    model_path = os.path.join(model_dir, "deployment_files", "model.pkl")
+    vectorizer_path = os.path.join(model_dir, "deployment_files", "vectorizer.pkl")
 
     with open(model_path, "rb") as f:
         model = pickle.load(f)
