@@ -1,5 +1,5 @@
-import pickle
 import json
+import pickle
 import os
 
 model = None
@@ -17,31 +17,27 @@ def init():
     model_path = os.path.join(model_dir, "model.pkl")
     vectorizer_path = os.path.join(model_dir, "vectorizer.pkl")
 
-    # Load model
     with open(model_path, "rb") as f:
         model = pickle.load(f)
 
-    # Load vectorizer
     with open(vectorizer_path, "rb") as f:
         vectorizer = pickle.load(f)
 
 # =========================
-# Prediction function
+# Prediction Function
 # =========================
 
 def run(data):
+
     try:
         data = json.loads(data)
 
         text = data["text"]
 
-        # Transform text
         vect = vectorizer.transform([text])
 
-        # Predict
         prediction = model.predict(vect)[0]
 
-        # Confidence score
         confidence = model.predict_proba(vect)[0].max()
 
         result = "Real" if prediction == 1 else "Fake"
@@ -52,6 +48,7 @@ def run(data):
         }
 
     except Exception as e:
+
         return {
             "error": str(e)
         }
