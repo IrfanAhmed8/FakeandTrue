@@ -1,0 +1,13 @@
+name: fake-news-env
+
+channels:
+  - defaults
+
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+      - azureml-defaults
+      - scikit-learn
+      - pandas
+      - numpy

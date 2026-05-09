@@ -1,45 +1,54 @@
-import pickle
 import json
+import pickle
 import os
+
+model = None
+vectorizer = None
+
+# =========================
+# Initialize model
+# =========================
 
 def init():
     global model, vectorizer
 
-    model_dir = os.getenv("AZUREML_MODEL_DIR")
+    model_dir = os.getenv("AZUREML_MODEL_DIR", ".")
 
-    # Try multiple possible paths (robust fix)
-    possible_paths = [
-        os.path.join(model_dir, "model.pkl"),
-        os.path.join(model_dir, "vectorizer.pkl"),
-        os.path.join(model_dir, "fake-news-model", "model.pkl"),
-        os.path.join(model_dir, "fake-news-model", "vectorizer.pkl"),
-    ]
+    model_path = os.path.join(model_dir, "model.pkl")
+    vectorizer_path = os.path.join(model_dir, "vectorizer.pkl")
 
-    # Find correct paths
-    model_path = None
-    vectorizer_path = None
+    with open(model_path, "rb") as f:
+        model = pickle.load(f)
 
-    for path in possible_paths:
-        if "model.pkl" in path and os.path.exists(path):
-            model_path = path
-        if "vectorizer.pkl" in path and os.path.exists(path):
-            vectorizer_path = path
+    with open(vectorizer_path, "rb") as f:
+        vectorizer = pickle.load(f)
 
-    if model_path is None or vectorizer_path is None:
-        raise Exception("Model or vectorizer file not found")
-
-    model = pickle.load(open(model_path, "rb"))
-    vectorizer = pickle.load(open(vectorizer_path, "rb"))
+# =========================
+# Prediction Function
+# =========================
 
 def run(data):
+
     try:
         data = json.loads(data)
+
         text = data["text"]
 
         vect = vectorizer.transform([text])
+
         prediction = model.predict(vect)[0]
 
-        return {"result": "Real" if prediction == 1 else "Fake"}
-    
+        confidence = model.predict_proba(vect)[0].max()
+
+        result = "Real" if prediction == 1 else "Fake"
+
+        return {
+            "result": result,
+            "confidence": round(float(confidence) * 100, 2)
+        }
+
     except Exception as e:
-        return {"error": str(e)}
+
+        return {
+            "error": str(e)
+        }
