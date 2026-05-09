@@ -1,5 +1,11 @@
+import os
+
 import streamlit as st
 import requests
+from dotenv import load_dotenv
+#now pass that env key to the header of the request in the frontend.py file when making the API call to the Flask backend. This way, you can securely authenticate your requests without hardcoding sensitive information in your codebase.
+
+load_dotenv()
 
 # =========================
 # PAGE CONFIG
@@ -198,13 +204,22 @@ if predict:
         with st.spinner("Analyzing article with AI..."):
 
             try:
-                url = "http://127.0.0.1:5000/predict"
+                url = "https://fake-news-endpoint.koreacentral.inference.ml.azure.com/score"
 
                 payload = {
                     "text": news_text
                 }
 
-                response = requests.post(url, json=payload)
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + os.getenv("PRIMARY_KEY")
+                }
+
+                response = requests.post(
+                    url,
+                    json=payload,
+                    headers=headers
+                )
 
                 result = response.json()
 

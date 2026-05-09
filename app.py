@@ -5,8 +5,8 @@ import pickle
 # Load model and vectorizer
 # =========================
 
-model = pickle.load(open("model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+model = pickle.load(open("deployment_files/model.pkl", "rb"))
+vectorizer = pickle.load(open("deployment_files/vectorizer.pkl", "rb"))
 
 # =========================
 # Create Flask app
